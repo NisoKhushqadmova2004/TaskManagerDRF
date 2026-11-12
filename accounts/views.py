@@ -6,6 +6,7 @@ from .serialaizers import *
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.throttling import ScopedRateThrottle
+from django.contrib.auth.models import User
 
 
 def tokens_for(user):
@@ -19,6 +20,12 @@ def register_view(request):
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
     return Response({'user': Userserialazer(user).data, 'tokens': tokens_for(user)},)
+
+@api_view(['GET'])
+def users_list(request):
+    users = User.objects.all()
+    serializer = Userserialazer(users, many=True)
+    return Response(serializer.data)
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer

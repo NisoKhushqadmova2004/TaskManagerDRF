@@ -7,26 +7,31 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, validators=[validate_password])
-
-
     class Meta:
         model = User
-        fields = ['username','email','password']
+        fields = ['username', 'email','password']
 
     def validate_email(self, value):
             if User.objects.filter(email__iexact=value).exists():
                 raise serializers.ValidationError('email алакай вучуд дорад')
             return value.lower()
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+        return user
     
-
-class Userserialazer(serializers.BaseSerializer):
+class Userserialazer(serializers.ModelSerializer):
     class Meta:
-        madel = User
-        fields = ['username','email','date_joined', 'last_login']
+        model = User
+        fields = ['username', 'email', 'date_joined', 'last_login']
 
-        
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer): 
     @classmethod
     def get_token(cls, user):
